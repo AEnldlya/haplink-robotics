@@ -1,123 +1,151 @@
 'use client';
 
-import { useRef, useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { useRef, useState, useEffect, ReactNode } from 'react';
+import { gsap } from 'gsap';
 
 interface MagneticButtonProps {
-  children: React.ReactNode;
+  children: ReactNode;
   className?: string;
   strength?: number;
-  onClick?: () => void;
 }
 
-export function MagneticButton({
-  children,
+export function MagneticButton({ 
+  children, 
   className = '',
-  strength = 0.3,
-  onClick,
+  strength = 0.3 
 }: MagneticButtonProps) {
-  const ref = useRef<HTMLButtonElement>(null);
-  const [position, setPosition] = useState({ x: 0, y: 0 });
-  const [isTouchDevice, setIsTouchDevice] = useState(true); // Default to true for SSR
-
-  useEffect(() => {
-    setIsTouchDevice(window.matchMedia('(hover: none)').matches);
-  }, []);
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLButtonElement>) => {
-    if (isTouchDevice || !ref.current) return;
-    
-    const { clientX, clientY } = e;
-    const { left, top, width, height } = ref.current.getBoundingClientRect();
-    const centerX = left + width / 2;
-    const centerY = top + height / 2;
-    
-    const x = (clientX - centerX) * strength;
-    const y = (clientY - centerY) * strength;
-    
-    setPosition({ x, y });
-  };
-
-  const handleMouseLeave = () => {
-    setPosition({ x: 0, y: 0 });
-  };
-
-  // On touch devices, render as static div (no motion, no cursor effects)
-  if (isTouchDevice) {
-    return (
-      <div className={className} onClick={onClick}>
-        {children}
-      </div>
-    );
-  }
-
-  return (
-    <motion.button
-      ref={ref}
-      onClick={onClick}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-      animate={{ x: position.x, y: position.y }}
-      transition={{ type: 'spring', stiffness: 150, damping: 15, mass: 0.1 }}
-      className={className}
-    >
-      {children}
-    </motion.button>
-  );
-}
-
-// Magnetic wrapper for any element
-interface MagneticWrapperProps {
-  children: React.ReactNode;
-  className?: string;
-  strength?: number;
-}
-
-export function MagneticWrapper({
-  children,
-  className = '',
-  strength = 0.2,
-}: MagneticWrapperProps) {
   const ref = useRef<HTMLDivElement>(null);
-  const [position, setPosition] = useState({ x: 0, y: 0 });
-  const [isTouchDevice, setIsTouchDevice] = useState(true);
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
 
   useEffect(() => {
     setIsTouchDevice(window.matchMedia('(hover: none)').matches);
   }, []);
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (isTouchDevice || !ref.current) return;
+  useEffect(() => {
+    if (isTouchDevice) return;
     
-    const { clientX, clientY } = e;
-    const { left, top, width, height } = ref.current.getBoundingClientRect();
-    const centerX = left + width / 2;
-    const centerY = top + height / 2;
-    
-    const x = (clientX - centerX) * strength;
-    const y = (clientY - centerY) * strength;
-    
-    setPosition({ x, y });
-  };
+    const element = ref.current;
+    if (!element) return;
 
-  const handleMouseLeave = () => {
-    setPosition({ x: 0, y: 0 });
-  };
+    const handleMouseMove = (e: MouseEvent) => {
+      const rect = element.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      
+      const deltaX = (e.clientX - centerX) * strength;
+      const deltaY = (e.clientY - centerY) * strength;
+
+      gsap.to(element, {
+        x: deltaX,
+        y: deltaY,
+        duration: 0.4,
+        ease: 'power3.out',
+      });
+    };
+
+    const handleMouseLeave = () => {
+      gsap.to(element, {
+        x: 0,
+        y: 0,
+        duration: 0.6,
+        ease: 'elastic.out(1, 0.3)',
+      });
+    };
+
+    element.addEventListener('mousemove', handleMouseMove);
+    element.addEventListener('mouseleave', handleMouseLeave);
+
+    return () => {
+      element.removeEventListener('mousemove', handleMouseMove);
+      element.removeEventListener('mouseleave', handleMouseLeave);
+    };
+  }, [isTouchDevice, strength]);
 
   if (isTouchDevice) {
     return <div className={className}>{children}</div>;
   }
 
   return (
-    <motion.div
-      ref={ref}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-      animate={{ x: position.x, y: position.y }}
-      transition={{ type: 'spring', stiffness: 150, damping: 15, mass: 0.1 }}
-      className={className}
+    <div 
+      ref={ref} 
+      className={`inline-block ${className}`}
+      style={{ willChange: 'transform' }}
     >
       {children}
-    </motion.div>
+    </div>
+  );
+}
+
+// Magnetic wrapper for larger elements
+interface MagneticAreaProps {
+  children: ReactNode;
+  className?: string;
+  strength?: number;
+}
+
+export function MagneticArea({ 
+  children, 
+  className = '',
+  strength = 0.15 
+}: MagneticAreaProps) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
+
+  useEffect(() => {
+    setIsTouchDevice(window.matchMedia('(hover: none)').matches);
+  }, []);
+
+  useEffect(() => {
+    if (isTouchDevice) return;
+    
+    const element = ref.current;
+    if (!element) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const rect = element.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      
+      const deltaX = (e.clientX - centerX) * strength;
+      const deltaY = (e.clientY - centerY) * strength;
+
+      gsap.to(element, {
+        x: deltaX,
+        y: deltaY,
+        duration: 0.5,
+        ease: 'power2.out',
+      });
+    };
+
+    const handleMouseLeave = () => {
+      gsap.to(element, {
+        x: 0,
+        y: 0,
+        duration: 0.8,
+        ease: 'elastic.out(1, 0.4)',
+      });
+    };
+
+    element.addEventListener('mousemove', handleMouseMove);
+    element.addEventListener('mouseleave', handleMouseLeave);
+
+    return () => {
+      element.removeEventListener('mousemove', handleMouseMove);
+      element.removeEventListener('mouseleave', handleMouseLeave);
+    };
+  }, [isTouchDevice, strength]);
+
+  if (isTouchDevice) {
+    return <div className={className}>{children}</div>;
+  }
+
+  return (
+    <div 
+      ref={ref} 
+      className={className}
+      style={{ willChange: 'transform' }}
+    >
+      {children}
+    </div>
   );
 }

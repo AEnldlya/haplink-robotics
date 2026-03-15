@@ -1,96 +1,112 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, ReactNode } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
 
 interface ScrollRevealProps {
-  children: React.ReactNode;
+  children: ReactNode;
   className?: string;
-  direction?: 'up' | 'down' | 'left' | 'right';
   delay?: number;
+  direction?: 'up' | 'down' | 'left' | 'right' | 'scale' | 'rotate';
   duration?: number;
-  distance?: number;
   scrub?: boolean | number;
   start?: string;
   end?: string;
+  pin?: boolean;
   markers?: boolean;
 }
 
 export function ScrollReveal({
   children,
   className = '',
-  direction = 'up',
   delay = 0,
-  duration = 1,
-  distance = 40,
+  direction = 'up',
+  duration = 0.8,
   scrub = false,
   start = 'top 85%',
-  end = 'bottom 15%',
+  end = 'bottom 20%',
+  pin = false,
   markers = false,
 }: ScrollRevealProps) {
-  const elementRef = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement>(null);
   const triggersRef = useRef<ScrollTrigger[]>([]);
 
   useEffect(() => {
-    const element = elementRef.current;
+    const element = ref.current;
     if (!element) return;
 
-    const getInitialTransform = () => {
-      switch (direction) {
-        case 'up': return { y: distance, x: 0 };
-        case 'down': return { y: -distance, x: 0 };
-        case 'left': return { x: distance, y: 0 };
-        case 'right': return { x: -distance, y: 0 };
-        default: return { y: distance, x: 0 };
-      }
+    const isTouch = window.matchMedia('(hover: none)').matches;
+    const adjustedDuration = isTouch ? duration * 0.6 : duration;
+    
+    // Physics-based easing
+    const easing = 'power3.out';
+
+    let fromVars: gsap.TweenVars = { opacity: 0 };
+    let toVars: gsap.TweenVars = { 
+      opacity: 1, 
+      duration: adjustedDuration,
+      ease: easing,
+      delay: delay,
     };
 
-    const initial = getInitialTransform();
-
-    // Set initial state
-    gsap.set(element, {
-      opacity: 0,
-      ...initial,
-    });
-
-    // Create animation
-    const tween = gsap.to(element, {
-      opacity: 1,
-      x: 0,
-      y: 0,
-      duration: scrub ? 1 : duration,
-      delay: scrub ? 0 : delay,
-      ease: 'power4.out',
-      scrollTrigger: scrub ? {
-        trigger: element,
-        start,
-        end,
-        scrub: scrub === true ? 1 : scrub,
-        markers,
-      } : {
-        trigger: element,
-        start,
-        toggleActions: 'play none none reverse',
-        markers,
-      },
-    });
-
-    if (tween.scrollTrigger) {
-      triggersRef.current.push(tween.scrollTrigger);
+    switch (direction) {
+      case 'up':
+        fromVars = { ...fromVars, y: isTouch ? 20 : 40 };
+        toVars = { ...toVars, y: 0 };
+        break;
+      case 'down':
+        fromVars = { ...fromVars, y: isTouch ? -20 : -40 };
+        toVars = { ...toVars, y: 0 };
+        break;
+      case 'left':
+        fromVars = { ...fromVars, x: isTouch ? 30 : 60 };
+        toVars = { ...toVars, x: 0 };
+        break;
+      case 'right':
+        fromVars = { ...fromVars, x: isTouch ? -30 : -60 };
+        toVars = { ...toVars, x: 0 };
+        break;
+      case 'scale':
+        fromVars = { ...fromVars, scale: 0.9 };
+        toVars = { ...toVars, scale: 1 };
+        break;
+      case 'rotate':
+        fromVars = { ...fromVars, rotateX: isTouch ? 10 : 15, y: isTouch ? 15 : 30 };
+        toVars = { ...toVars, rotateX: 0, y: 0 };
+        break;
     }
+
+    const ctx = gsap.context(() => {
+      const tween = gsap.fromTo(element, fromVars, {
+        ...toVars,
+        scrollTrigger: {
+          trigger: element,
+          start,
+          end,
+          scrub: scrub === true ? 1 : scrub,
+          pin,
+          markers,
+          toggleActions: scrub ? undefined : 'play none none none',
+        },
+      });
+      
+      if (tween.scrollTrigger) {
+        triggersRef.current.push(tween.scrollTrigger);
+      }
+    });
 
     return () => {
       triggersRef.current.forEach(trigger => trigger.kill());
       triggersRef.current = [];
-      tween.kill();
+      ctx.revert();
     };
-  }, [direction, delay, duration, distance, scrub, start, end, markers]);
+  }, [delay, direction, duration, scrub, start, end, pin, markers]);
 
   return (
-    <div ref={elementRef} className={className}>
+    <div ref={ref} className={className} style={{ perspective: '1000px' }}>
       {children}
     </div>
   );
@@ -98,21 +114,17 @@ export function ScrollReveal({
 
 // Staggered children reveal
 interface StaggerRevealProps {
-  children: React.ReactNode[];
+  children: ReactNode;
   className?: string;
-  childClassName?: string;
-  stagger?: number;
-  direction?: 'up' | 'down' | 'left' | 'right';
-  start?: string;
+  staggerDelay?: number;
+  direction?: 'up' | 'left' | 'right' | 'scale';
 }
 
 export function StaggerReveal({
   children,
   className = '',
-  childClassName = '',
-  stagger = 0.1,
+  staggerDelay = 0.1,
   direction = 'up',
-  start = 'top 85%',
 }: StaggerRevealProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const triggersRef = useRef<ScrollTrigger[]>([]);
@@ -121,110 +133,104 @@ export function StaggerReveal({
     const container = containerRef.current;
     if (!container) return;
 
-    const items = container.children;
-    if (items.length === 0) return;
+    const isTouch = window.matchMedia('(hover: none)').matches;
+    const children = container.children;
+    
+    if (children.length === 0) return;
 
-    const getInitialTransform = () => {
-      switch (direction) {
-        case 'up': return { y: 40 };
-        case 'down': return { y: -40 };
-        case 'left': return { x: 40 };
-        case 'right': return { x: -40 };
-        default: return { y: 40 };
-      }
-    };
+    let fromVars: gsap.TweenVars = { opacity: 0 };
 
-    const initial = getInitialTransform();
-
-    gsap.set(items, {
-      opacity: 0,
-      ...initial,
-    });
-
-    const tween = gsap.to(items, {
-      opacity: 1,
-      x: 0,
-      y: 0,
-      duration: 0.8,
-      stagger,
-      ease: 'power3.out',
-      scrollTrigger: {
-        trigger: container,
-        start,
-        toggleActions: 'play none none reverse',
-      },
-    });
-
-    if (tween.scrollTrigger) {
-      triggersRef.current.push(tween.scrollTrigger);
+    switch (direction) {
+      case 'up':
+        fromVars = { ...fromVars, y: isTouch ? 20 : 30 };
+        break;
+      case 'left':
+        fromVars = { ...fromVars, x: isTouch ? 20 : 40 };
+        break;
+      case 'right':
+        fromVars = { ...fromVars, x: isTouch ? -20 : -40 };
+        break;
+      case 'scale':
+        fromVars = { ...fromVars, scale: 0.95 };
+        break;
     }
+
+    const ctx = gsap.context(() => {
+      const tween = gsap.fromTo(children, fromVars, {
+        opacity: 1,
+        y: 0,
+        x: 0,
+        scale: 1,
+        duration: isTouch ? 0.5 : 0.7,
+        stagger: isTouch ? staggerDelay * 0.5 : staggerDelay,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: container,
+          start: 'top 85%',
+          toggleActions: 'play none none none',
+        },
+      });
+      
+      if (tween.scrollTrigger) {
+        triggersRef.current.push(tween.scrollTrigger);
+      }
+    });
 
     return () => {
       triggersRef.current.forEach(trigger => trigger.kill());
       triggersRef.current = [];
-      tween.kill();
+      ctx.revert();
     };
-  }, [stagger, direction, start]);
+  }, [staggerDelay, direction]);
 
   return (
     <div ref={containerRef} className={className}>
-      {children.map((child, index) => (
-        <div key={index} className={childClassName}>
-          {child}
-        </div>
-      ))}
+      {children}
     </div>
   );
 }
 
-// Parallax element
+// Parallax scroll effect
 interface ParallaxProps {
-  children: React.ReactNode;
+  children: ReactNode;
   className?: string;
-  speed?: number;
-  direction?: 'vertical' | 'horizontal';
+  speed?: number; // -1 to 1, negative moves slower, positive moves faster
 }
 
-export function Parallax({
-  children,
-  className = '',
-  speed = 0.5,
-  direction = 'vertical',
-}: ParallaxProps) {
-  const elementRef = useRef<HTMLDivElement>(null);
+export function Parallax({ children, className = '', speed = 0.5 }: ParallaxProps) {
+  const ref = useRef<HTMLDivElement>(null);
   const triggersRef = useRef<ScrollTrigger[]>([]);
 
   useEffect(() => {
-    const element = elementRef.current;
+    const element = ref.current;
     if (!element) return;
 
-    const distance = 100 * speed;
-    const prop = direction === 'vertical' ? 'y' : 'x';
-
-    const tween = gsap.to(element, {
-      [prop]: distance,
-      ease: 'none',
-      scrollTrigger: {
-        trigger: element,
-        start: 'top bottom',
-        end: 'bottom top',
-        scrub: true,
-      },
+    const ctx = gsap.context(() => {
+      const tween = gsap.to(element, {
+        y: () => speed * 100,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: element,
+          start: 'top bottom',
+          end: 'bottom top',
+          scrub: 1,
+        },
+      });
+      
+      if (tween.scrollTrigger) {
+        triggersRef.current.push(tween.scrollTrigger);
+      }
     });
-
-    if (tween.scrollTrigger) {
-      triggersRef.current.push(tween.scrollTrigger);
-    }
 
     return () => {
       triggersRef.current.forEach(trigger => trigger.kill());
       triggersRef.current = [];
-      tween.kill();
+      ctx.revert();
     };
-  }, [speed, direction]);
+  }, [speed]);
 
   return (
-    <div ref={elementRef} className={className}>
+    <div ref={ref} className={className}>
       {children}
     </div>
   );

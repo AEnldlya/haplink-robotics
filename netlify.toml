@@ -1,0 +1,5 @@
+[build]
+  publish = "dist"
+
+[site]
+  name = "haplink-robotics-v2"
