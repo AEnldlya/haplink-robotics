@@ -149,3 +149,51 @@ export function MagneticArea({
     </div>
   );
 }
+
+// Button with shimmer effect
+interface ShimmerButtonProps {
+  children: ReactNode;
+  className?: string;
+  onClick?: () => void;
+}
+
+export function ShimmerButton({ children, className = '', onClick }: ShimmerButtonProps) {
+  return (
+    <button 
+      onClick={onClick}
+      className={`relative overflow-hidden group ${className}`}
+    >
+      <span className="relative z-10">{children}</span>
+      <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+    </button>
+  );
+}
+
+// Glow button
+interface GlowButtonProps {
+  children: ReactNode;
+  className?: string;
+  glowColor?: string;
+}
+
+export function GlowButton({ children, className = '', glowColor = '#00D9FF' }: GlowButtonProps) {
+  return (
+    <MagneticButton strength={0.4}>
+      <button 
+        className={`relative group ${className}`}
+        style={{ 
+          boxShadow: `0 0 0 transparent`,
+          transition: 'box-shadow 0.5s ease'
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.boxShadow = `0 0 60px ${glowColor}40`;
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.boxShadow = `0 0 0 transparent`;
+        }}
+      >
+        {children}
+      </button>
+    </MagneticButton>
+  );
+}

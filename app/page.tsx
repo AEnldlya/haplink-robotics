@@ -1,16 +1,14 @@
 'use client';
 
-import { useEffect, useRef, Suspense } from 'react';
+import { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Link from 'next/link';
-import { ArrowRight, Zap, Heart, Users, Trophy, Cpu, ChevronRight } from 'lucide-react';
-import { ScrollReveal, StaggerReveal, Parallax } from '@/components/ScrollReveal';
-import { LineReveal } from '@/components/TextReveal';
-import { TiltCard } from '@/components/TiltCard';
-import { MagneticButton, MagneticArea } from '@/components/MagneticButton';
+import { ArrowRight, Zap, Heart, Users, Trophy, ChevronRight, Play } from 'lucide-react';
+import { ScrollReveal, StaggerReveal, Parallax, Counter, SplitText, LineReveal } from '@/components/ScrollReveal';
+import { TiltCard, HoverLift, GlowCard } from '@/components/TiltCard';
+import { MagneticButton, GlowButton } from '@/components/MagneticButton';
 import { Footer } from '@/components/Footer';
-import { FloatingShapes } from '@/components/FloatingShapes';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -22,28 +20,81 @@ export default function HomePage() {
     const isTouch = window.matchMedia('(hover: none)').matches;
     
     const ctx = gsap.context(() => {
-      // Hero entrance animation
+      // Hero entrance animation sequence
       const tl = gsap.timeline({ delay: isTouch ? 0.1 : 0.3 });
 
-      tl.from('.hero-line', {
+      // 1. Logo mark scale-in + glow fade
+      tl.from('.logo-mark', {
+        scale: 0.8,
+        opacity: 0,
+        duration: isTouch ? 0.5 : 0.8,
+        ease: 'expo.out',
+      })
+      // 2. Navigation staggered fade-in
+      .from('.nav-item', {
+        y: -20,
+        opacity: 0,
+        duration: isTouch ? 0.3 : 0.5,
+        stagger: isTouch ? 0.05 : 0.1,
+        ease: 'power3.out',
+      }, '-=0.4')
+      // 3. Hero headline line-by-line reveal
+      .from('.hero-line', {
         y: isTouch ? 30 : 80,
         opacity: 0,
         duration: isTouch ? 0.6 : 1.2,
         stagger: isTouch ? 0.08 : 0.12,
         ease: 'expo.out',
-      })
+      }, '-=0.3')
+      // 4. Subheadline opacity + upward motion
       .from('.hero-subtitle', {
         y: isTouch ? 15 : 25,
         opacity: 0,
         duration: isTouch ? 0.5 : 0.9,
         ease: 'power3.out',
       }, '-=0.5')
+      // 5. Background parallax drift
+      .from('.hero-bg', {
+        scale: 1.1,
+        duration: 1.5,
+        ease: 'power2.out',
+      }, 0)
+      // 6. Hero image slide-in from depth
+      .from('.hero-image', {
+        scale: 1.2,
+        opacity: 0,
+        duration: isTouch ? 0.8 : 1.2,
+        ease: 'expo.out',
+      }, '-=1')
+      // 7. Button shimmer on load
       .from('.hero-cta', {
         y: isTouch ? 15 : 25,
         opacity: 0,
         duration: isTouch ? 0.5 : 0.9,
         ease: 'power3.out',
-      }, '-=0.5');
+      }, '-=0.5')
+      // 8. Icon micro-pops
+      .from('.hero-icon', {
+        scale: 0,
+        duration: isTouch ? 0.3 : 0.4,
+        stagger: 0.05,
+        ease: 'back.out(2)',
+      }, '-=0.3');
+
+      // Scroll-scrubbed hero animation timeline
+      const heroScrollTl = gsap.timeline({
+        scrollTrigger: {
+          trigger: heroRef.current,
+          start: 'top top',
+          end: 'bottom top',
+          scrub: 1,
+        },
+      });
+
+      heroScrollTl
+        .to('.hero-content', { y: -100, opacity: 0 })
+        .to('.hero-bg', { y: 100, scale: 1.1 }, 0)
+        .to('.floating-element', { y: -150, rotation: 15 }, 0);
 
       // Stats counter animation
       const statNumbers = document.querySelectorAll('.stat-number');
@@ -59,11 +110,31 @@ export default function HomePage() {
             scrollTrigger: {
               trigger: stat,
               start: 'top 85%',
-              toggleActions: 'play none none none',
+              toggleActions: 'play none none reverse',
             },
           }
         );
       });
+
+      // Section headers sliding in from offset (reversible)
+      gsap.utils.toArray<HTMLElement>('.section-header').forEach((header) => {
+        gsap.fromTo(header,
+          { x: -50, opacity: 0 },
+          {
+            x: 0,
+            opacity: 1,
+            duration: 0.8,
+            ease: 'expo.out',
+            scrollTrigger: {
+              trigger: header,
+              start: 'top 85%',
+              end: 'top 50%',
+              toggleActions: 'play none none reverse',
+            },
+          }
+        );
+      });
+
     }, heroRef);
 
     return () => ctx.revert();
@@ -119,21 +190,28 @@ export default function HomePage() {
   ];
 
   return (
-    <main className="relative bg-[#050A15]">
-      {/* Ambient Background - Integrated shapes */}
+    <main className="relative bg-[#050A15] overflow-hidden">
+      {/* Ambient Background - Integrated shapes with parallax */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-0 left-1/4 w-[800px] h-[800px] bg-[#00D9FF]/[0.03] rounded-full blur-[150px]" />
-        <div className="absolute bottom-1/4 right-0 w-[600px] h-[600px] bg-[#FF006E]/[0.03] rounded-full blur-[120px]" />
+        <Parallax speed={-0.3}>
+          <div className="absolute top-0 left-1/4 w-[800px] h-[800px] bg-[#00D9FF]/[0.03] rounded-full blur-[150px]" />
+        </Parallax>
+        <Parallax speed={0.2}>
+          <div className="absolute bottom-1/4 right-0 w-[600px] h-[600px] bg-[#FF006E]/[0.03] rounded-full blur-[120px]" />
+        </Parallax>
+        <Parallax speed={-0.5}>
+          <div className="absolute top-1/2 left-0 w-[400px] h-[400px] bg-[#00D9FF]/[0.02] rounded-full blur-[100px]" />
+        </Parallax>
       </div>
 
-      {/* Hero Section */}
+      {/* Hero Section with scroll-scrubbed animation */}
       <section 
         ref={heroRef} 
         className="relative min-h-screen flex items-center pt-20 overflow-hidden"
       >
-        {/* Background Image with Mask */}
+        {/* Background Image with gradient overlay and parallax */}
         <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          className="hero-bg absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{
             backgroundImage: 'url(https://haplink.net/wp-content/uploads/2024/01/IMG_5890-edited.jpg)',
           }}
@@ -142,44 +220,47 @@ export default function HomePage() {
           <div className="absolute inset-0 bg-gradient-to-r from-[#050A15]/90 via-transparent to-[#050A15]/50" />
         </div>
         
-        {/* 3D Floating Shapes - Desktop only */}
-        <div className="hidden lg:block absolute inset-0 pointer-events-none">
-          <Suspense fallback={null}>
-            <FloatingShapes />
-          </Suspense>
-        </div>
+        {/* Floating elements with orbit animation */}
+        <div className="floating-element hidden lg:block absolute top-1/4 right-1/4 w-32 h-32 border border-[#00D9FF]/20 rounded-full" />
+        <div className="floating-element hidden lg:block absolute bottom-1/3 left-1/5 w-24 h-24 border border-[#FF006E]/20 rounded-full" />
 
         {/* Diagonal Shape Divider */}
         <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#050A15] to-transparent" />
 
-        <div className="relative z-10 container-premium py-16 lg:py-24">
+        <div className="hero-content relative z-10 container-premium py-16 lg:py-24">
           <div className="max-w-3xl">
-            {/* Label */}
+            {/* Label with clip reveal */}
             <div className="overflow-hidden mb-4">
               <p className="hero-line font-mono text-xs sm:text-sm text-[#00D9FF] tracking-[0.2em] uppercase">
                 FIRST Tech Challenge • Team 26532
               </p>
             </div>
 
-            {/* Main Title */}
+            {/* Main Title with line reveal */}
             <div className="overflow-hidden mb-2">
-              <h1 className="hero-line font-display text-5xl sm:text-6xl lg:text-7xl xl:text-8xl text-white tracking-tight">
-                HapLink
-              </h1>
+              <LineReveal>
+                <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl xl:text-8xl text-white tracking-tight">
+                  HapLink
+                </h1>
+              </LineReveal>
             </div>
             <div className="overflow-hidden mb-6">
-              <h2 className="hero-line font-display-light text-2xl sm:text-3xl lg:text-4xl text-gradient tracking-tight">
-                Happy Haptic Doctors
-              </h2>
+              <LineReveal delay={0.1}>
+                <h2 className="font-display-light text-2xl sm:text-3xl lg:text-4xl text-gradient tracking-tight">
+                  Happy Haptic Doctors
+                </h2>
+              </LineReveal>
             </div>
 
-            {/* Description */}
-            <p className="hero-subtitle text-[#94A3B8] text-base sm:text-lg lg:text-xl max-w-xl mb-8 lg:mb-10 leading-relaxed">
-              Bringing haptic technology to life. We create immersive experiences that let you 
-              feel concerts, sporting events, and entertainment from anywhere.
-            </p>
+            {/* Description with blur reveal */}
+            <ScrollReveal direction="blur" delay={0.2}>
+              <p className="hero-subtitle text-[#94A3B8] text-base sm:text-lg lg:text-xl max-w-xl mb-8 lg:mb-10 leading-relaxed">
+                Bringing haptic technology to life. We create immersive experiences that let you 
+                feel concerts, sporting events, and entertainment from anywhere.
+              </p>
+            </ScrollReveal>
 
-            {/* CTAs */}
+            {/* CTAs with magnetic effect */}
             <div className="hero-cta flex flex-col sm:flex-row flex-wrap items-start gap-4">
               <MagneticButton strength={0.4}>
                 <Link
@@ -202,17 +283,17 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Stats Section - Integrated with layout */}
+      {/* Stats Section with counter animation */}
       <section ref={statsRef} className="relative py-16 lg:py-20 border-y border-white/5">
         <div className="container-premium">
           <StaggerReveal className="grid grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12" staggerDelay={0.1}>
             {stats.map((stat, index) => (
-              <div key={index} className="text-center lg:text-left">
+              <div key={index} className="text-center lg:text-left group">
                 <div className="font-display text-4xl sm:text-5xl lg:text-6xl text-white mb-2">
                   <span className="stat-number" data-value={stat.value}>0</span>
                   <span className="text-[#00D9FF]">{stat.suffix}</span>
                 </div>
-                <div className="text-white font-medium text-sm sm:text-base">{stat.label}</div>
+                <div className="text-white font-medium text-sm sm:text-base group-hover:text-[#00D9FF] transition-colors duration-300">{stat.label}</div>
                 <div className="text-[#64748B] text-xs sm:text-sm">{stat.sublabel}</div>
               </div>
             ))}
@@ -220,7 +301,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Features Section - Grid with integrated shapes */}
+      {/* Features Section with 3D tilt cards */}
       <section className="section-padding relative">
         <div className="container-premium">
           {/* Section Header */}
@@ -238,22 +319,24 @@ export default function HomePage() {
             </p>
           </ScrollReveal>
 
-          {/* Features Grid */}
+          {/* Features Grid with hover effects */}
           <div className="grid sm:grid-cols-2 gap-4 lg:gap-6">
             {features.map((feature, index) => (
               <ScrollReveal key={index} delay={index * 0.1} direction="up">
                 <TiltCard className="h-full" maxTilt={5}>
-                  <div className={`group h-full p-6 sm:p-8 bg-[#0F1428] border border-white/5 rounded-2xl hover:border-${feature.color === 'cyan' ? '[#00D9FF]' : '[#FF006E]'}/30 transition-all duration-500 hover-lift`}>
-                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-5 transition-colors duration-300 ${
-                      feature.color === 'cyan' 
-                        ? 'bg-[#00D9FF]/10 group-hover:bg-[#00D9FF]/20' 
-                        : 'bg-[#FF006E]/10 group-hover:bg-[#FF006E]/20'
-                    }`}>
-                      <feature.icon size={24} className={feature.color === 'cyan' ? 'text-[#00D9FF]' : 'text-[#FF006E]'} />
+                  <HoverLift>
+                    <div className={`group h-full p-6 sm:p-8 bg-[#0F1428] border border-white/5 rounded-2xl hover:border-${feature.color === 'cyan' ? '[#00D9FF]' : '[#FF006E]'}/30 transition-all duration-500`}>
+                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-5 transition-all duration-300 ${
+                        feature.color === 'cyan' 
+                          ? 'bg-[#00D9FF]/10 group-hover:bg-[#00D9FF]/20 group-hover:scale-110' 
+                          : 'bg-[#FF006E]/10 group-hover:bg-[#FF006E]/20 group-hover:scale-110'
+                      }`}>
+                        <feature.icon size={24} className={`${feature.color === 'cyan' ? 'text-[#00D9FF]' : 'text-[#FF006E]'} group-hover:rotate-12 transition-transform duration-300`} />
+                      </div>
+                      <h3 className="font-display text-lg sm:text-xl text-white mb-2 group-hover:translate-x-1 transition-transform duration-300">{feature.title}</h3>
+                      <p className="text-[#94A3B8] text-sm sm:text-base leading-relaxed">{feature.description}</p>
                     </div>
-                    <h3 className="font-display text-lg sm:text-xl text-white mb-2">{feature.title}</h3>
-                    <p className="text-[#94A3B8] text-sm sm:text-base leading-relaxed">{feature.description}</p>
-                  </div>
+                  </HoverLift>
                 </TiltCard>
               </ScrollReveal>
             ))}
@@ -261,7 +344,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Products Section - Full-width with proper image placement */}
+      {/* Products Section with image zoom */}
       <section className="section-padding relative border-y border-white/5">
         <div className="container-premium">
           {/* Section Header */}
@@ -278,43 +361,50 @@ export default function HomePage() {
             </p>
           </ScrollReveal>
 
-          {/* Products Grid */}
+          {/* Products Grid with image treatments */}
           <div className="grid lg:grid-cols-2 gap-6 lg:gap-8">
             {products.map((product, index) => (
               <ScrollReveal key={index} delay={index * 0.15} direction="scale">
-                <MagneticArea strength={0.1}>
-                  <div className="group relative bg-[#0F1428] border border-white/5 rounded-2xl overflow-hidden hover:border-white/10 transition-colors duration-500">
-                    {/* Image Container - Proper aspect ratio */}
+                <GlowCard glowColor={index === 0 ? '#00D9FF' : '#FF006E'}>
+                  <div className="group relative bg-[#0F1428] rounded-2xl overflow-hidden">
+                    {/* Image Container with zoom effect */}
                     <div className="relative aspect-[16/10] overflow-hidden">
                       <img
                         src={product.image}
                         alt={product.title}
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 img-premium"
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 img-premium"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-[#0F1428] via-[#0F1428]/40 to-transparent" />
                       
-                      {/* Tag */}
+                      {/* Tag with micro-animation */}
                       <div className="absolute top-4 left-4">
-                        <span className="font-mono text-xs text-[#00D9FF] bg-[#00D9FF]/10 backdrop-blur-sm px-3 py-1.5 rounded-full border border-[#00D9FF]/20">
+                        <span className="font-mono text-xs text-[#00D9FF] bg-[#00D9FF]/10 backdrop-blur-sm px-3 py-1.5 rounded-full border border-[#00D9FF]/20 group-hover:bg-[#00D9FF]/20 transition-colors duration-300">
                           {product.tag}
                         </span>
+                      </div>
+
+                      {/* Play button overlay on hover */}
+                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                        <div className="w-16 h-16 rounded-full bg-[#00D9FF]/20 backdrop-blur-sm flex items-center justify-center border border-[#00D9FF]/30 group-hover:scale-110 transition-transform duration-300">
+                          <Play size={24} className="text-[#00D9FF] ml-1" />
+                        </div>
                       </div>
                     </div>
                     
                     {/* Content */}
                     <div className="p-6 lg:p-8">
-                      <h3 className="font-display text-xl sm:text-2xl text-white mb-3">{product.title}</h3>
+                      <h3 className="font-display text-xl sm:text-2xl text-white mb-3 group-hover:text-[#00D9FF] transition-colors duration-300">{product.title}</h3>
                       <p className="text-[#94A3B8] text-sm sm:text-base leading-relaxed">{product.description}</p>
                     </div>
                   </div>
-                </MagneticArea>
+                </GlowCard>
               </ScrollReveal>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Journey Section - Split layout with image */}
+      {/* Journey Section with split layout */}
       <section className="section-padding relative">
         <div className="container-premium">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
@@ -340,10 +430,10 @@ export default function HomePage() {
               <div className="flex flex-wrap gap-4 mt-8">
                 <Link
                   href="/2024-worlds"
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-[#00D9FF]/10 border border-[#00D9FF]/30 text-[#00D9FF] rounded-full font-medium text-sm hover:bg-[#00D9FF] hover:text-[#050A15] transition-all duration-300"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-[#00D9FF]/10 border border-[#00D9FF]/30 text-[#00D9FF] rounded-full font-medium text-sm hover:bg-[#00D9FF] hover:text-[#050A15] transition-all duration-300 group"
                 >
                   2024 Worlds
-                  <ArrowRight size={16} />
+                  <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
                 </Link>
                 <Link
                   href="/2025"
@@ -354,34 +444,36 @@ export default function HomePage() {
               </div>
             </ScrollReveal>
 
-            {/* Image - Properly placed */}
+            {/* Image with parallax and shape background */}
             <ScrollReveal delay={0.2} direction="right">
               <div className="relative">
-                {/* Background Shape */}
-                <div className="absolute -inset-4 bg-gradient-to-br from-[#00D9FF]/10 to-[#FF006E]/10 rounded-3xl blur-2xl" />
+                {/* Background Shape with glow */}
+                <div className="absolute -inset-4 bg-gradient-to-br from-[#00D9FF]/10 to-[#FF006E]/10 rounded-3xl blur-2xl group-hover:blur-3xl transition-all duration-500" />
                 
-                <div className="relative aspect-[4/3] rounded-2xl overflow-hidden border border-white/10">
-                  <img
-                    src="https://haplink.net/wp-content/uploads/2024/01/IMG_5890-edited.jpg"
-                    alt="HapLink Team"
-                    className="w-full h-full object-cover img-premium"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#050A15]/60 to-transparent" />
-                </div>
+                <Parallax speed={0.1}>
+                  <div className="relative aspect-[4/3] rounded-2xl overflow-hidden border border-white/10 group">
+                    <img
+                      src="https://haplink.net/wp-content/uploads/2024/01/IMG_5890-edited.jpg"
+                      alt="HapLink Team"
+                      className="w-full h-full object-cover img-premium group-hover:scale-105 transition-transform duration-700"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#050A15]/60 to-transparent" />
+                  </div>
+                </Parallax>
               </div>
             </ScrollReveal>
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
+      {/* CTA Section with glow backgrounds */}
       <section className="section-padding relative border-t border-white/5">
         <div className="container-premium">
-          <ScrollReveal>
+          <ScrollReveal direction="scale">
             <div className="relative p-8 sm:p-12 lg:p-16 bg-[#0F1428] border border-white/5 rounded-3xl overflow-hidden">
-              {/* Background Glow */}
-              <div className="absolute top-0 right-0 w-96 h-96 bg-[#00D9FF]/10 rounded-full blur-[100px]" />
-              <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#FF006E]/10 rounded-full blur-[100px]" />
+              {/* Background Glows with animation */}
+              <div className="absolute top-0 right-0 w-96 h-96 bg-[#00D9FF]/10 rounded-full blur-[100px] animate-pulse" />
+              <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#FF006E]/10 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: '1s' }} />
               
               <div className="relative z-10 max-w-2xl mx-auto text-center">
                 <h2 className="font-display text-2xl sm:text-3xl lg:text-4xl text-white mb-4">
@@ -392,15 +484,15 @@ export default function HomePage() {
                   Support Team 26532 and help us bring innovation to life.
                 </p>
                 <div className="flex flex-col sm:flex-row flex-wrap items-center justify-center gap-4">
-                  <MagneticButton strength={0.4}>
+                  <GlowButton glowColor="#00D9FF">
                     <Link
                       href="/team"
-                      className="inline-flex items-center gap-2 px-8 py-4 bg-[#00D9FF] text-[#050A15] rounded-full font-semibold text-sm hover:shadow-[0_0_60px_rgba(0,217,255,0.4)] transition-shadow duration-500"
+                      className="inline-flex items-center gap-2 px-8 py-4 bg-[#00D9FF] text-[#050A15] rounded-full font-semibold text-sm"
                     >
                       Meet the Team
                       <ArrowRight size={18} />
                     </Link>
-                  </MagneticButton>
+                  </GlowButton>
                   <Link
                     href="/donate"
                     className="inline-flex items-center gap-2 px-8 py-4 border border-[#FF006E]/30 text-[#FF006E] rounded-full font-medium text-sm hover:bg-[#FF006E] hover:text-[#050A15] transition-all duration-300"
