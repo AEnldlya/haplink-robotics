@@ -8,10 +8,10 @@ import { Menu, X } from 'lucide-react';
 
 const navLinks = [
   { href: '/', label: 'Home' },
-  { href: '/about', label: 'About' },
-  { href: '/services', label: 'Services' },
-  { href: '/portfolio', label: 'Portfolio' },
-  { href: '/contact', label: 'Contact' },
+  { href: '/team', label: 'Team' },
+  { href: '/robot', label: 'Robot' },
+  { href: '/2024-worlds', label: 'Worlds' },
+  { href: '/2025', label: '2025' },
 ];
 
 export function Navigation() {
@@ -55,10 +55,10 @@ export function Navigation() {
                 className="flex items-center gap-3"
               >
                 <div className="w-10 h-10 rounded-full border border-cyan/30 flex items-center justify-center group-hover:border-cyan transition-colors duration-300">
-                  <span className="text-cyan font-display font-bold text-lg">A</span>
+                  <span className="text-cyan font-display font-bold text-lg">H</span>
                 </div>
                 <span className="font-display font-medium text-lg tracking-tight hidden sm:block">
-                  Aureum<span className="text-cyan">Studio</span>
+                  Hap<span className="text-cyan">Link</span>
                 </span>
               </motion.div>
             </Link>
@@ -97,10 +97,10 @@ export function Navigation() {
               className="hidden lg:block"
             >
               <Link
-                href="/contact"
+                href="/donate"
                 className="relative px-6 py-3 text-sm font-medium bg-magenta/10 border border-magenta/30 text-magenta rounded-full hover:bg-magenta hover:text-void transition-all duration-300 hover:shadow-[0_0_30px_rgba(255,0,110,0.3)]"
               >
-                Get Started
+                Support Us
               </Link>
             </motion.div>
 
@@ -159,10 +159,10 @@ export function Navigation() {
                 transition={{ duration: 0.4, delay: 0.6 }}
               >
                 <Link
-                  href="/contact"
+                  href="/donate"
                   className="mt-4 px-8 py-4 text-lg font-medium bg-magenta text-void rounded-full"
                 >
-                  Get Started
+                  Support Us
                 </Link>
               </motion.div>
             </motion.nav>

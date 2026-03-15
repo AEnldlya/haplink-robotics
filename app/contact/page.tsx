@@ -71,14 +71,20 @@ export default function ContactPage() {
     {
       icon: Mail,
       label: 'Email',
-      value: 'studio.aureum.reachout@gmail.com',
-      href: 'mailto:studio.aureum.reachout@gmail.com',
+      value: 'andy.li.zhang2010@gmail.com',
+      href: 'mailto:andy.li.zhang2010@gmail.com',
     },
     {
       icon: Phone,
       label: 'Phone',
-      value: '603 678 0701',
-      href: 'tel:6036780701',
+      value: '+1 (603) 306-7508',
+      href: 'tel:+16033067508',
+    },
+    {
+      icon: MapPin,
+      label: 'Location',
+      value: 'Hanover, New Hampshire',
+      href: '#',
     },
     {
       icon: Clock,
