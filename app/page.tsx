@@ -309,17 +309,17 @@ export default function HomePage() {
   }, []);
 
   const features = [
-    { icon: Zap, title: 'Haptic Technology', description: 'Feel concerts and events through advanced touch sensors.', color: 'cyan' },
-    { icon: Trophy, title: 'State Champions', description: 'First year competing, won state. Excellence drives us.', color: 'magenta' },
-    { icon: Users, title: 'Team 26532', description: 'Eight students and coaches pushing robotics boundaries.', color: 'cyan' },
-    { icon: Heart, title: 'Community First', description: 'Making premium entertainment accessible to everyone.', color: 'magenta' },
+    { icon: Zap, title: 'Premium Design', description: 'Stunning websites crafted with cinematic animations.', color: 'cyan' },
+    { icon: Trophy, title: 'Fast Delivery', description: 'Your website live in 10 days. Quality without the wait.', color: 'magenta' },
+    { icon: Users, title: 'Expert Team', description: 'Experienced developers and designers at your service.', color: 'cyan' },
+    { icon: Heart, title: 'Client First', description: 'We listen, adapt, and deliver beyond expectations.', color: 'magenta' },
   ];
 
   const achievements = [
-    { icon: Star, label: 'World Championship', value: '2024' },
-    { icon: Award, label: 'State Champions', value: '2024' },
-    { icon: Target, label: 'Rookie Rank', value: '#1' },
-    { icon: Sparkles, label: 'Innovation Award', value: 'Winner' },
+    { icon: Star, label: 'Websites Built', value: '47' },
+    { icon: Award, label: 'Client Satisfaction', value: '100%' },
+    { icon: Target, label: 'Avg Delivery', value: '10 Days' },
+    { icon: Sparkles, label: 'Industries', value: '12+' },
   ];
 
   return (
@@ -354,7 +354,7 @@ export default function HomePage() {
           <div className="max-w-3xl">
             <div className="overflow-hidden mb-4">
               <p className="hero-line font-mono text-xs sm:text-sm text-[#00D9FF] tracking-[0.2em] uppercase">
-                FIRST Tech Challenge • Team 26532
+                Premium Web Design Studio
               </p>
             </div>
 

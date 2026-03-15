@@ -24,13 +24,13 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "HapLink | Happy Haptic Doctors - Team 26532",
-  description: "FIRST Tech Challenge robotics team bringing haptic technology to life. Experience concerts and events through innovative haptic wearables.",
-  keywords: ["robotics", "FIRST Tech Challenge", "haptic technology", "Team 26532", "HapLink"],
-  authors: [{ name: "HapLink Robotics" }],
+  title: "Aureum Studio | Premium Web Design",
+  description: "We build stunning, high-converting websites for local businesses. 10-day delivery, professional design, and exceptional results.",
+  keywords: ["web design", "website development", "local business", "premium websites", "Aureum Studio"],
+  authors: [{ name: "Aureum Studio" }],
   openGraph: {
-    title: "HapLink | Happy Haptic Doctors",
-    description: "Bringing haptic technology to life through robotics innovation",
+    title: "Aureum Studio | Premium Web Design",
+    description: "Professional websites built for local businesses that want to stand out online.",
     type: "website",
   },
 };
