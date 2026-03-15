@@ -24,13 +24,13 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "HapLink | Happy Haptic Doctors - Team 26532",
-  description: "FIRST Tech Challenge robotics team bringing haptic technology to life. Experience concerts and events through innovative haptic wearables.",
-  keywords: ["robotics", "FIRST Tech Challenge", "haptic technology", "Team 26532", "HapLink"],
-  authors: [{ name: "HapLink Robotics" }],
+  title: "HapLink | Team 26532",
+  description: "FIRST Tech Challenge robotics team. Eight students, one robot, infinite innovation. State champions building the future.",
+  keywords: ["robotics", "FIRST Tech Challenge", "Team 26532", "HapLink", "Happy Haptic Doctors"],
+  authors: [{ name: "Team 26532" }],
   openGraph: {
-    title: "HapLink | Happy Haptic Doctors",
-    description: "Bringing haptic technology to life through robotics innovation",
+    title: "HapLink | Team 26532",
+    description: "Eight students. One robot. Infinite innovation.",
     type: "website",
   },
 };
@@ -42,7 +42,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${inter.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable}`}>
-      <body className="bg-[#050A15] text-[#F0F4F8] antialiased overflow-x-hidden">
+      <body className="bg-[#0A1628] text-[#F0F4F8] antialiased overflow-x-hidden">
         <SmoothScroll>
           <Navigation />
           <PageTransition>
