@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+.next/
+dist/
+
+# Production builds
+deploy.tar.gz
+haplink-deploy.tar.gz
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Local env files
+.env*.local
+.env
+
+# Misc
+.DS_Store
+*.pem
+
+# Debug
+.pnpm-debug.log*
+
+# Cache
+.cache/
+*.pack
