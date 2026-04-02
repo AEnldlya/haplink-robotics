@@ -6,39 +6,17 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Link from 'next/link';
 import { ArrowRight, Trophy, Users, Zap, ChevronRight } from 'lucide-react';
 import { Footer } from '@/components/Footer';
+import { HeroAceternity } from '@/components/HeroAceternity';
 
 gsap.registerPlugin(ScrollTrigger);
 
 export default function HomePage() {
-  const heroRef = useRef<HTMLDivElement>(null);
   const storyRef = useRef<HTMLDivElement>(null);
   const robotRef = useRef<HTMLDivElement>(null);
   const teamRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      // Hero animations - staggered, non-uniform
-      const heroTl = gsap.timeline({ delay: 0.3 });
-      
-      heroTl
-        .from('.hero-label', { y: 30, opacity: 0, duration: 0.8, ease: 'power3.out' })
-        .from('.hero-title span', { 
-          y: 100, 
-          opacity: 0, 
-          duration: 1.2, 
-          stagger: 0.08,
-          ease: 'expo.out' 
-        }, '-=0.4')
-        .from('.hero-subtitle', { y: 40, opacity: 0, duration: 0.9, ease: 'power3.out' }, '-=0.6')
-        .from('.hero-cta', { y: 30, opacity: 0, duration: 0.8, ease: 'back.out(1.7)' }, '-=0.4')
-        .from('.hero-visual', { 
-          scale: 0.8, 
-          opacity: 0, 
-          rotation: -5,
-          duration: 1.4, 
-          ease: 'expo.out' 
-        }, '-=1');
-
       // Story section - scroll triggered
       gsap.from('.story-content', {
         scrollTrigger: {
@@ -117,75 +95,8 @@ export default function HomePage() {
 
   return (
     <main className="bg-[#0A1628] text-[#F0F4F8] overflow-x-hidden">
-      {/* Hero Section - Asymmetrical Layout */}
-      <section ref={heroRef} className="min-h-screen relative flex items-center">
-        <div className="max-w-[1600px] mx-auto px-6 lg:px-12 py-24 w-full">
-          <div className="grid lg:grid-cols-12 gap-8 items-center">
-            {/* Content - Left, shifted up */}
-            <div className="lg:col-span-7 lg:pr-12 relative z-10">
-              <span className="hero-label inline-block text-[#00D9FF] text-sm font-mono tracking-[0.3em] uppercase mb-6">
-                FIRST Tech Challenge 2024-2025
-              </span>
-              
-              <h1 className="hero-title font-display text-6xl md:text-7xl lg:text-8xl font-bold leading-[0.9] mb-8">
-                <span className="block overflow-hidden">
-                  <span className="inline-block">We Are</span>
-                </span>
-                <span className="block overflow-hidden">
-                  <span className="inline-block text-[#00D9FF]">Team</span>
-                </span>
-                <span className="block overflow-hidden">
-                  <span className="inline-block">26532</span>
-                </span>
-              </h1>
-              
-              <p className="hero-subtitle text-xl md:text-2xl text-[#94A3B8] max-w-lg mb-10 leading-relaxed">
-                Eight students. One robot. Infinite innovation. We are the Happy Haptic Doctors, and this is our story.
-              </p>
-              
-              <div className="hero-cta flex flex-wrap gap-4">
-                <Link 
-                  href="/team" 
-                  className="group inline-flex items-center gap-3 px-8 py-4 bg-[#00D9FF] text-[#0A1628] rounded-full font-semibold hover:shadow-[0_0_40px_rgba(0,217,255,0.4)] transition-all duration-300"
-                >
-                  Meet the Team
-                  <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
-                </Link>
-                <Link 
-                  href="/robot" 
-                  className="inline-flex items-center gap-3 px-8 py-4 border border-[#00D9FF]/30 text-[#00D9FF] rounded-full font-semibold hover:bg-[#00D9FF]/10 transition-all duration-300"
-                >
-                  See the Robot
-                </Link>
-              </div>
-            </div>
-            
-            {/* Visual - Right, overlapping */}
-            <div className="lg:col-span-5 relative">
-              <div className="hero-visual relative aspect-square">
-                {/* Geometric shapes */}
-                <div className="absolute inset-0 bg-gradient-to-br from-[#00D9FF]/20 to-[#FF006E]/20 rounded-3xl transform rotate-3" />
-                <div className="absolute -top-8 -right-8 w-32 h-32 border-2 border-[#00D9FF]/30 rounded-full" />
-                <div className="absolute -bottom-4 -left-4 w-24 h-24 bg-[#FF006E]/20 rounded-full blur-xl" />
-                
-                {/* Robot placeholder */}
-                <div className="relative z-10 w-full h-full bg-[#1E3A5F] rounded-3xl flex items-center justify-center overflow-hidden">
-                  <div className="text-center">
-                    <Zap size={80} className="text-[#00D9FF] mx-auto mb-4" />
-                    <span className="text-[#94A3B8] font-mono text-sm">HapLink 2.0</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        {/* Scroll indicator */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2">
-          <span className="text-[#94A3B8] text-xs font-mono uppercase tracking-widest">Scroll</span>
-          <div className="w-px h-12 bg-gradient-to-b from-[#00D9FF] to-transparent" />
-        </div>
-      </section>
+      {/* Hero Section - Aceternity Style */}
+      <HeroAceternity />
 
       {/* Story Section - Broken Grid */}
       <section ref={storyRef} className="py-32 relative">
